@@ -48,7 +48,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     GLint           _backingHeight;
 
     int             _frameCount;
-    
+
     int64_t         _lastFrameTime;
 
     IJK_GLES2_Renderer *_renderer;
@@ -63,7 +63,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     BOOL            _shouldLockWhileBeingMovedToWindow;
     NSMutableArray *_registeredNotifications;
 
-    IJKSDLHudViewController *_hudViewController;
+    // IJKSDLHudViewController *_hudViewController;
     IJKSDLGLViewApplicationState _applicationState;
 }
 
@@ -82,11 +82,13 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         _registeredNotifications = [[NSMutableArray alloc] init];
         [self registerApplicationObservers];
 
+        //Fist setting by UI-Thread, then by global notification
+        _applicationState = IJKSDLGLViewApplicationForegroundState;
         _didSetupGL = NO;
         [self setupGLOnce];
 
-        _hudViewController = [[IJKSDLHudViewController alloc] init];
-        [self addSubview:_hudViewController.tableView];
+        // _hudViewController = [[IJKSDLHudViewController alloc] init];
+        // [self addSubview:_hudViewController.tableView];
     }
 
     return self;
@@ -230,7 +232,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 
     EAGLContext *prevContext = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:_context];
-    
+
     IJK_GLES2_Renderer_reset(_renderer);
     IJK_GLES2_Renderer_freeP(&_renderer);
 
@@ -274,7 +276,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     newFrame.size.height  = selfFrame.size.height * 8 / 8;
     newFrame.origin.y    += selfFrame.size.height * 0 / 8;
 
-    _hudViewController.tableView.frame = newFrame;
+    // _hudViewController.tableView.frame = newFrame;
     [self invalidateRenderBuffer];
 }
 
@@ -344,6 +346,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 
 - (void)display: (SDL_VoutOverlay *) overlay
 {
+  dispatch_async(dispatch_get_main_queue(), ^{
     if (![self setupGLOnce])
         return;
 
@@ -364,6 +367,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     }
 
     [self unlockGLActive];
+  }
 }
 
 // NOTE: overlay could be NULl
@@ -442,7 +446,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         [self.glActiveLock unlock];
         return NO;
     }
-    
+
     return YES;
 }
 
@@ -637,6 +641,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 #pragma mark IJKFFHudController
 - (void)setHudValue:(NSString *)value forKey:(NSString *)key
 {
+  /*
     if ([[NSThread currentThread] isMainThread]) {
         [_hudViewController setHudValue:value forKey:key];
     } else {
@@ -644,6 +649,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
             [self setHudValue:value forKey:key];
         });
     }
+    */
 }
 
 - (void)setShouldLockWhileBeingMovedToWindow:(BOOL)shouldLockWhileBeingMovedToWindow
@@ -653,12 +659,12 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 
 - (void)setShouldShowHudView:(BOOL)shouldShowHudView
 {
-    _hudViewController.tableView.hidden = !shouldShowHudView;
+    // _hudViewController.tableView.hidden = !shouldShowHudView;
 }
 
 - (BOOL)shouldShowHudView
 {
-    return !_hudViewController.tableView.hidden;
+    // return !_hudViewController.tableView.hidden;
 }
 
 @end
