@@ -211,6 +211,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         case IJKSDLGLViewApplicationBackgroundState:
             return NO;
         default: {
+          /*
             UIApplicationState appState = [UIApplication sharedApplication].applicationState;
             switch (appState) {
                 case UIApplicationStateActive:
@@ -220,6 +221,8 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
                 default:
                     return NO;
             }
+            */
+            return NO;
         }
     }
 }
@@ -367,7 +370,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     }
 
     [self unlockGLActive];
-  }
+  });
 }
 
 // NOTE: overlay could be NULl
@@ -665,6 +668,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 - (BOOL)shouldShowHudView
 {
     // return !_hudViewController.tableView.hidden;
+    return NO;
 }
 
 @end
